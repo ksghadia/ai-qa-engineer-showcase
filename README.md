@@ -19,38 +19,35 @@ Design principles:
 ## Architecture
 
 ```mermaid
-flowchart LR
-    U([QA engineer]) --> O[qa-engineer<br/>orchestrator]
+flowchart TB
+    U([QA engineer]) --> O["qa-engineer<br/>(orchestrator)"]
 
     O --> D[test-case-designer]
     O --> R[test-case-reviewer]
     O --> A[test-automation-engineer]
     O --> B[bug-analyst]
 
-    subgraph Skills
-        S1[Understand<br/>document-analysis · requirement-review · product-knowledge]
-        S2[Design<br/>test-design · xray-test-cases · review-test-cases]
-        S3[Execute<br/>run-tests · api-test · automate-test]
-        S4[Report<br/>bug-report · bug-analysis · test-report · regression-scope]
-        S5[Improve<br/>self-improve · learn-from-edits · skill-benchmark · qa-metrics · defect-gap-analysis]
+    subgraph SK["20 skills, grouped by QA stage"]
+        direction LR
+        S1[Understand<br/>3 skills] --> S2[Design<br/>3 skills] --> S3[Execute<br/>3 skills] --> S4[Report<br/>5 skills] --> S5[Improve<br/>5 skills]
     end
 
-    D --> S1 & S2
-    R --> S2
-    A --> S3
-    B --> S4
-    O --> S3 & S4
+    D --> SK
+    R --> SK
+    A --> SK
+    B --> SK
+    S5 -. lessons .-> S1
 
-    S5 -. lessons .-> Skills
-
-    subgraph Local["Connected locally (not in the repo)"]
-        M[(MCP servers<br/>tracker · wiki · design · DB · browser)]
-        P[Local profile<br/>projects · environments · conventions]
+    subgraph LOCAL["Connected on my machine, not in the repo"]
+        direction LR
+        M[(MCP servers<br/>tracker, wiki, design,<br/>database, browser)]
+        P[Local profile<br/>projects, environments,<br/>conventions]
     end
 
-    Skills <--> M
-    Skills --> P
+    SK <--> LOCAL
 ```
+
+One orchestrator hands work to four specialists. Each agent calls the skills for its stage (the full list is in [Skills](#skills)), and the Improve skills feed lessons back into the earlier stages. Company tools and context stay on my machine.
 
 ## Workflow
 
@@ -159,7 +156,7 @@ ai-qa-engineer/
 
 ## Benchmarks
 
-Each suite has a prompt and graders. Several contain deliberately planted bugs or gaps that a good run must find. A full run repeats every case three times and compares the results with a no-plugin baseline, so a skill change has to beat plain Claude, not just the previous version.
+Each suite has a prompt and graders. Several contain deliberately planted bugs or gaps that a good run must find. A full run repeats every case three times; the benchmark script can also add a no-plugin baseline run for comparison.
 
 | Suite | What it checks |
 |---|---|
@@ -174,6 +171,27 @@ Each suite has a prompt and graders. Several contain deliberately planted bugs o
 | `bug-analysis-triage` | Reaches the right verdict and root cause |
 | `regression-scope-release` | Scopes regression for a release with risk |
 | `test-report-verdict` | Gives an honest ship / no-ship verdict |
+
+### Latest results
+
+Plugin v0.2.3, 3 runs per suite, latest full run of each suite (14–15 Oct 2026). A run passes when its graders accept it; the score is the average grader score across the three runs (1.00 means every run fully passed).
+
+| Suite | Runs passed | Score |
+|---|---|---|
+| `requirement-review-upload` | 3 / 3 | 1.00 |
+| `document-analysis-hidden-decisions` | 3 / 3 | 1.00 |
+| `gap-analysis-ui-only` | 3 / 3 | 1.00 |
+| `review-weak-cases` | 3 / 3 | 1.00 |
+| `run-tests-evidence` | 3 / 3 | 1.00 |
+| `regression-scope-release` | 3 / 3 | 1.00 |
+| `bug-analysis-triage` | 3 / 3 | 1.00 |
+| `test-report-verdict` | 3 / 3 | 1.00 |
+| `api-test-contract` | 2 / 3 | 0.89 |
+| `bug-report-quality` | 2 / 3 | 0.89 |
+| `design-password-reset` | 2 / 3 | 0.67 |
+| **All 11 suites** | **30 / 33 (91%)** | **0.95** |
+
+The three suites below 3 / 3 are the current focus of the learning loop. These are with-plugin results only; a no-plugin baseline comparison has not been recorded yet.
 
 ## Learning loop
 
